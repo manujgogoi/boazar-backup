@@ -5,12 +5,12 @@ User = get_user_model()
 class Vendor(models.Model):
     name = models.CharField(max_length=80)
     user = models.OneToOneField(User, related_name='vendor', on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
     
     def __str__(self):
         return self.name

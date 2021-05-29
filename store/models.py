@@ -2,7 +2,9 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 class Category(MPTTModel):
     """
     Category table implemented with MPTT
@@ -35,7 +37,7 @@ class ProductType(models.Model):
     ProductType table will provide a list of the different types
     of products that are for sale.
     """
-    name = models.CharField(verbose_name=_("Product Name"), help_text=_("Required"), max_length=255)
+    name = models.CharField(verbose_name=_("Product Type Name"), help_text=_("Required"), max_length=255)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -72,7 +74,7 @@ class Product(models.Model):
     is_feature = models.BooleanField(default=False)
     quantity = models.IntegerField(verbose_name=_("Quantity"), help_text=_("Optional"), null=True, blank=True)
     wholesale_min_quantity = models.IntegerField(verbose_name=_("Wholesale Minimum Quantity"), help_text=_("Optional"), null=True, blank=True)
-
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     regular_price = models.DecimalField(
         verbose_name=_("Regular Price"),
         help_text=_("Maximum 99999.99"),
@@ -116,7 +118,6 @@ class Product(models.Model):
         help_text=_("Change product visibility"),
         default=True,
     )
-
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
@@ -136,7 +137,7 @@ class ProductSpecificationValue(models.Model):
     The Product Specification Value table holds each of the 
     products individual specification or bespoke features.
     """
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_specification_values")
     specification = models.ForeignKey(ProductSpecification, on_delete=models.RESTRICT)
     value = models.CharField(
         verbose_name=_("Value"),

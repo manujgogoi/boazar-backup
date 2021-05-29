@@ -188,4 +188,8 @@ if settings.DEBUG:
 
 1. create `frontend` in `boazar0.7` root
 2. `npx create-react-app frontend`
-3.
+3. `npm install @material-ui/core`
+4. `npm install @material-ui/icons`
+5. `npm install --save react-router-dom`
+6. `npm install axios`
+7. `npm i js-cookie`

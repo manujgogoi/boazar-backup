@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from .serializers import LoginSerializer, UserSerializer
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.renderers import JSONRenderer
+from rest_framework import status
 
 from knox.views import LoginView as KnoxLoginView
 from knox.auth import TokenAuthentication
@@ -20,7 +21,8 @@ from django.contrib.auth import login
 User = get_user_model()
 
 
-class UserCheckAPIView(APIView):
+
+class UserAPIView(APIView):
     serializer = UserSerializer
     permission_classes = [IsAuthenticated,]
     authentication_classes = [TokenAuthentication,]
@@ -28,19 +30,6 @@ class UserCheckAPIView(APIView):
     def post(self, request, *args, **kwargs):
         id = request.data["id"]
         user = User.objects.get(pk=id)
-        try:
-            vendor = Vendor.objects.get(user=id);
-        except:
-            vendor = False
-
-        if vendor:
-            v = {
-                'id': vendor.id,
-                'name': vendor.name,
-            }
-        else:
-            v = {'id': False, }
-
         if user:
             return Response({
                 'id' : user.id,
@@ -48,7 +37,6 @@ class UserCheckAPIView(APIView):
                 'last_login': user.last_login,
                 'is_superuser': user.is_superuser,
                 'phone_number': user.phone_number,
-                'vendor': v
             })   
 
         return Response({
@@ -60,12 +48,11 @@ class UserCheckAPIView(APIView):
 class RegisterAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({
-            'status': True,
-            'message': 'Account created successfully'
-        })
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print("Register error >>>>>>>>>>>>>>>>>>>> ", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginAPIView(KnoxLoginView):
@@ -78,14 +65,20 @@ class LoginAPIView(KnoxLoginView):
         login(request, user)
         return super().post(request, format=None)
 
-class UserAPIView(APIView):
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated,]
-    authentication_classes = [TokenAuthentication,]
-
+class UsernameExistsAPIView(APIView):
+    permission_classes = [AllowAny,]
     def post(self, request, *args, **kwargs):
-        user = request.user
+        """
+        First check username key is present in request
+        if not then set name = 'anonymous'
+        Return true if username matches
+        """
+        name = request.data.get('username', 'anonymous')
+        if User.objects.filter(username=name).exists():
+            return Response({
+                'message': True
+            })
         return Response({
-            'username': user.username,
-            'id': user.id
+            'message': False
         })
+

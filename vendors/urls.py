@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import RegisterAPIView
+from .views import BecomeVendorAPIView, VendorDetailAPIView
 
 app_name='vendors'
 
 urlpatterns = [
-    path('api/register', RegisterAPIView.as_view(), name='api-register-vendor' ),
+    path('become_vendor', BecomeVendorAPIView.as_view(), name='api-become-vendor' ),
+    path('vendor_detail', VendorDetailAPIView.as_view(), name='api-vendor-detail')
 ]

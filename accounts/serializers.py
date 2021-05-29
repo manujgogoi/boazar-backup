@@ -6,7 +6,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password']
+        fields = '__all__'
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -40,14 +40,14 @@ class LoginSerializer(serializers.ModelSerializer):
                 user = authenticate(request=self.context.get('request'), username=username, password=password)
             else:
                 msg = {
-                    'message': 'User not found',
+                    'message': 'Invalid username or password',
                     'status': False
                 }    
                 raise serializers.ValidationError(msg)
             
             if not user:
                 msg = {
-                    'message': 'Username and password are not matching. Try again',
+                    'message': 'Invalid username or password',
                     'status': False
                 } 
                 raise serializers.ValidationError(msg, code='authorization')
@@ -59,3 +59,8 @@ class LoginSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(msg, code='authorization')
         attrs['user'] = user
         return attrs
+
+class UserCheckSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username']

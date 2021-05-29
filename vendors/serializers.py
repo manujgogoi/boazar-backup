@@ -4,4 +4,4 @@ from .models import Vendor
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
-        fields = ['id', 'name', 'created_at', 'updated_at', 'user']
+        fields = '__all__'
